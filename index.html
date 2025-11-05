@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hyrox – Planner 4 semaines</title>
+  <style>
+    :root{
+      --bg:#020617;
+      --card:#020617;
+      --surface:#020617;
+      --surface-soft:#0b1220;
+      --surface-strong:#020617;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --accent:#38bdf8;
+      --accent-soft:rgba(56,189,248,.14);
+      --accent2:#f97373;
+      --ok:#4ade80;
+      --warn:#facc15;
+      --chip:#020617;
+      --border:#1f2937;
+      --border-soft:#111827;
+      --highlight:#1d4ed8;
+      --shadow-soft:0 18px 45px rgba(15,23,42,0.7);
+    }
+
+    .legend .dot{
+  display:none;
+}
+
+    *{box-sizing:border-box;}
+
+    html,body{
+      margin:0;
+      padding:0;
+      background:radial-gradient(circle at top, #020617 0, #020617 40%, #020617 100%);
+      color:var(--text);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    body{
+      min-height:100vh;
+    }
+
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding:16px 16px 32px;
+    }
+
+    header{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    h1{
+      font-size:clamp(20px,2.7vw,30px);
+      margin:0;
+      letter-spacing:0.4px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    h1::before{
+      content:"🔥";
+      font-size:20px;
+    }
+
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+
+    .control{
+      background:rgba(15,23,42,.9);
+      border:1px solid var(--border);
+      padding:8px 10px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .control label{
+      color:var(--muted);
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    .control select{
+      background:#020617;
+      border:1px solid var(--border-soft);
+      color:var(--text);
+      padding:7px 10px;
+      border-radius:10px;
+      outline:none;
+      font-size:13px;
+    }
+
+    .control select:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px var(--accent-soft);
+    }
+
+    .btn{
+      cursor:pointer;
+      background:linear-gradient(135deg,var(--accent),#60a5fa);
+      border:none;
+      color:#020617;
+      padding:9px 14px;
+      border-radius:12px;
+      font-weight:700;
+      font-size:14px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      transition:transform .08s ease, box-shadow .08s ease, background .12s ease, opacity .12s ease;
+      box-shadow:0 12px 30px rgba(56,189,248,.22);
+      white-space:nowrap;
+    }
+
+    .btn.secondary{
+      background:rgba(15,23,42,1);
+      color:var(--text);
+      border:1px solid var(--border);
+      box-shadow:none;
+    }
+    /* Bouton Fermer dans la modale : plus visible */
+    .modal-head .btn.secondary{
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: #e5f4ff;
+      font-weight:700;
+    }
+
+    .modal-head .btn.secondary:hover{
+      background: var(--accent);
+      color:#020617;
+      box-shadow:0 12px 30px rgba(56,189,248,.35);
+    }
+
+
+    .btn:hover{
+      transform:translateY(-1px);
+      box-shadow:0 16px 40px rgba(15,23,42,.65);
+      opacity:0.96;
+    }
+
+    .btn:active{
+      transform:translateY(0);
+      box-shadow:none;
+      opacity:0.9;
+    }
+
+    .btn.is-done{
+      background:linear-gradient(135deg,var(--ok),#22c55e);
+      color:#022c22;
+      box-shadow:0 14px 35px rgba(34,197,94,.32);
+    }
+
+    .filters-btn{
+      display:none; /* visible seulement en mobile */
+    }
+
+    .legend{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:8px;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(15,23,42,.9);
+      border:1px solid var(--border-soft);
+      cursor:pointer;
+      transition:opacity .12s ease, transform .08s ease, box-shadow .08s ease;
+      color:#020617;
+      font-weight:600;
+    }
+
+    .chip[data-active="false"]{opacity:0.35; filter:grayscale(.4);}
+    .chip[data-active="true"]:hover{
+      transform:translateY(-1px);
+      box-shadow:0 10px 25px rgba(15,23,42,.65);
+    }
+
+    /* couleur du texte par type */
+  .chip.Run{background:#60a5fa;}
+.chip.Strength{background:#f59e0b;}
+.chip.Sled{background:#ef4444;}
+.chip.Compromise{background:#c084fc;}
+.chip.Erg{background:#06b6d4;}
+.chip.Mobility{background:#22c55e;}
+.chip.MiniHyrox{background:#fb7185;}
+
+    .week-title{
+      margin:20px 0 10px;
+      font-weight:800;
+      letter-spacing:0.4px;
+      font-size:15px;
+      color:var(--muted);
+    }
+
+    .week-title span{
+      color:var(--accent);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:10px;
+    }
+
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr;}
+    }
+
+    .day{
+      background:rgba(15,23,42,.95);
+      border:1px solid var(--border-soft);
+      border-radius:16px;
+      overflow:hidden;
+      transition:transform .08s ease, box-shadow .08s ease, border-color .1s ease;
+    }
+
+    .day:hover{
+      transform:translateY(-2px);
+      box-shadow:var(--shadow-soft);
+      border-color:rgba(148,163,184,.6);
+    }
+
+    .day-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:9px 12px;
+      background:linear-gradient(135deg,rgba(15,23,42,1),rgba(15,23,42,.98));
+      border-bottom:1px solid var(--border-soft);
+    }
+
+    .day-header .name{
+      font-weight:700;
+      font-size:13px;
+    }
+
+    .date-wrap{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:3px;
+    }
+
+    .day-header .date{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.4px;
+    }
+
+    .today-pill{
+      font-size:10px;
+      padding:3px 6px;
+      border-radius:999px;
+      background:var(--accent-soft);
+      color:var(--accent);
+      text-transform:uppercase;
+      letter-spacing:.4px;
+    }
+
+    .day.today{
+      box-shadow:0 0 0 1px rgba(56,189,248,.75), 0 0 22px rgba(56,189,248,.35);
+      border-color:var(--accent);
+      position:relative;
+    }
+
+    .sessions{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      padding:10px;
+    }
+
+    .card{
+      background:radial-gradient(circle at top left, #020617 0, #020617 45%, #020617 100%);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      cursor:pointer;
+      transition:transform .06s ease, box-shadow .08s ease, border-color .08s ease, background .1s ease, opacity .1s ease;
+    }
+
+    .card:hover{
+      transform:translateY(-1px);
+      box-shadow:0 14px 35px rgba(15,23,42,.7);
+      border-color:rgba(148,163,184,.7);
+      background:radial-gradient(circle at top left, #020617 0, #020617 36%, #020617 100%);
+    }
+
+    .card.done{
+      border-color:rgba(34,197,94,.7);
+      box-shadow:0 0 0 1px rgba(34,197,94,.25);
+      opacity:0.9;
+    }
+
+    .card.done .time{
+      border-color:rgba(34,197,94,.7);
+      background:rgba(34,197,94,.18);
+      color:#bbf7d0;
+    }
+
+    .title{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+
+    .time{
+      font-weight:700;
+      font-size:11px;
+      color:var(--accent);
+      background:var(--accent-soft);
+      border:1px solid rgba(56,189,248,.5);
+      padding:4px 9px;
+      border-radius:999px;
+      text-transform:uppercase;
+      letter-spacing:.4px;
+    }
+
+    .type{
+      font-weight:700;
+      font-size:13px;
+    }
+
+    .session-status{
+      margin-left:auto;
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.4px;
+      padding:3px 7px;
+      border-radius:999px;
+      background:rgba(34,197,94,.18);
+      color:#bbf7d0;
+      border:1px solid rgba(34,197,94,.6);
+    }
+
+    .focus{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+
+    .tag{
+      font-size:11px;
+      color:#e5e7eb;
+      background:rgba(15,23,42,.9);
+      border:1px dashed rgba(148,163,184,.5);
+      padding:4px 8px;
+      border-radius:999px;
+      line-height:1.3;
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      display:inline-block;
+    }
+    .Run{background:#60a5fa}
+    .Strength{background:#f59e0b}
+    .Sled{background:#ef4444}
+    .Compromise{background:#c084fc}
+    .Mobility{background:#22c55e}
+    .Erg{background:#06b6d4}
+    .MiniHyrox{background:#fb7185}
+
+    /* MODAL */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(3,6,15,.82);
+      backdrop-filter:blur(10px);
+      z-index:50;
+      padding:16px;
+    }
+
+    .modal[open]{display:flex;}
+
+    .modal-card{
+      max-width:820px;
+      width:100%;
+      background:radial-gradient(circle at top, #020617 0, #020617 40%, #020617 100%);
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(148,163,184,.55);
+      box-shadow:0 24px 80px rgba(15,23,42,.95);
+      max-height:calc(100vh - 32px);
+      display:flex;
+      flex-direction:column;
+    }
+
+    .modal-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 14px;
+      background:linear-gradient(135deg,rgba(15,23,42,1),rgba(15,23,42,.96));
+      border-bottom:1px solid var(--border-soft);
+      gap:8px;
+    }
+
+    .modal-head h3{
+      margin:0;
+      font-size:16px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      color:#e5e7eb;
+    }
+
+    .modal-body{
+      padding:14px;
+      display:grid;
+      gap:10px;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      overflow:auto;
+    }
+
+    .kv{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:9px;
+      background:rgba(15,23,42,.9);
+    }
+
+    .kv h4{
+      margin:0 0 4px;
+      font-size:12px;
+      color:var(--muted);
+      letter-spacing:.3px;
+      text-transform:uppercase;
+    }
+
+    .kv pre{
+      white-space:pre-wrap;
+      margin:0;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      line-height:1.35;
+      font-size:12px;
+      word-break:break-word;
+      color:#e5e7eb;
+    }
+
+    .modal-body .small{
+      grid-column:1/-1;
+      font-size:11px;
+      color:var(--muted);
+      display:flex;
+      align-items:center;
+      gap:6px;
+      margin-top:2px;
+    }
+
+    .modal-actions{
+      display:flex;
+      gap:8px;
+      justify-content:flex-end;
+      padding:10px 12px 12px;
+      border-top:1px solid var(--border-soft);
+      background:rgba(15,23,42,.96);
+    }
+
+    .sticky{
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:linear-gradient(180deg, rgba(2,6,23,0.98) 70%, rgba(2,6,23,0));
+      padding-top:6px;
+      margin-top:-6px;
+      padding-bottom:8px;
+    }
+
+    /* RESPONSIVE HEADER / FILTRES */
+    @media (max-width:720px){
+      header{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+      .controls{
+        width:100%;
+        justify-content:space-between;
+        flex-wrap:wrap;
+        gap:8px;
+      }
+      .control{
+        flex:1 1 100%;
+        margin-bottom:4px;
+      }
+      .btn{
+        flex:0 0 auto;
+      }
+      .filters-btn{
+        display:inline-flex;
+      }
+      .legend{
+        display:none;
+        width:100%;
+      }
+      .legend.is-open{
+        display:flex;
+      }
+    }
+
+    @media (max-width:560px){
+      .container{
+        padding-inline:12px;
+      }
+      .modal-card{
+        max-width:100%;
+        max-height:calc(100vh - 24px);
+      }
+      .modal-body{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="sticky">
+      <h1>Hyrox – Planner 4 semaines</h1>
+
+      <div class="controls">
+        <div class="control">
+          <label for="weekSelect">Semaine</label>
+          <select id="weekSelect">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+        <button class="btn secondary" id="todayBtn">Aujourd'hui</button>
+        <button class="btn secondary filters-btn" id="filtersBtn">☰ Filtres</button>
+      </div>
+
+      <div class="legend" id="legend"></div>
+    </header>
+
+    <div id="content"></div>
+  </div>
+
+  <dialog class="modal" id="modal"></dialog>
+
+<script>
+/* -------------------- DATA -------------------- */
+const plan = [
+  // ===== WEEK 1 =====
+  {Week:1,Day:"Lundi",Time:"Midi",SessionType:"Strength (Bas + Core)",Focus:"Technique bas du corps + core (préparer sled/wall balls)",WarmUp:"5' vélo/tapis Z1-Z2 + mobilité hanches/chevilles 5' + activation glute (pont fessier 2x12)",MainSet:"Front squat 5x3 @70-75% (tempo 3-1-1) ; Split squat bulgare 3x8/side ; RDL 3x6 ; Pallof press 3x10/side",Intensity_Target:"RPE 6-7 (charge technique)",Recovery_Between_Sets:"90-120'' entre séries lourdes",CoolDown:"Respiration nasale 3-5' + étirements dynamiques",Strength_Details:"",Notes:"Filmer 1 série de front squat (angles genoux/chevilles)."},
+  {Week:1,Day:"Lundi",Time:"Soir",SessionType:"Run Technique",Focus:"Technique course + aisance",WarmUp:"10' Z2 facile + gammes (montées genoux/talons-fesses/ABC) 8'",MainSet:"8x20'' relâchées (foulée courte, cadence 170-180) / 60'' marche-trot",Intensity_Target:"Z3 court par la sensation, RPE 7 max",Recovery_Between_Sets:"60''",CoolDown:"10' Z1-Z2 + mobilité chevilles 5'",Strength_Details:"",Notes:"Focus : appuis sous le centre de gravité, légère inclinaison, bras proches du buste."},
+  {Week:1,Day:"Mardi",Time:"Midi",SessionType:"Erg Z2",Focus:"Aérobie continue (SkiErg/Rameur)",WarmUp:"5' progressif Z1→Z2",MainSet:"30' en Z2 continue (cadence confortable)",Intensity_Target:"Garmin Z2 (≈70–78% FCmax)",Recovery_Between_Sets:"-",CoolDown:"5' Z1",Strength_Details:"",Notes:"Respiration régulière, éviter la dérive cardiaque >5 bpm si possible."},
+  {Week:1,Day:"Mardi",Time:"Soir",SessionType:"Sled Push Lourd",Focus:"Force spécifique sled (poussées courtes)",WarmUp:"2x12,5 m très léger + 2x12,5 m modéré",MainSet:"10-12x(10-15 m) charge lourde mais contrôlée, mains basses, pas courts",Intensity_Target:"RPE 8-9 (traction lente mais fluide)",Recovery_Between_Sets:"2-3' entre allers",CoolDown:"2x12,5 m léger + respiration 3-5'",Strength_Details:"Hack/presse 3x6 @RPE 8 ; Dead bug 3x10/side",Notes:"Noter charge/temps par 12,5 m. Bracing avant chaque départ."},
+  {Week:1,Day:"Mercredi",Time:"Midi",SessionType:"Bench Lourd + Tirages",Focus:"Force haut du corps (objectif 100 kg)",WarmUp:"Rotations épaules + élastiques 5'",MainSet:"Bench 5x3 @80–85% (pause 1s poitrine) ; Row haltères 4x8 ; Face pulls 3x15 ; Dips assistés 3x6-8",Intensity_Target:"RPE 8 sur les 2 dernières séries de bench",Recovery_Between_Sets:"120''",CoolDown:"Étirements pectoraux + T-spine 5'",Strength_Details:"",Notes:"Scapulas serrées, trajectoire barre stable."},
+  {Week:1,Day:"Mercredi",Time:"Soir",SessionType:"Compromise (Run + Wall Balls)",Focus:"Tolérance transitions run↔WB",WarmUp:"10' Z2 + 10 WB faciles",MainSet:"5x (800 m @ seuil confortable + 15-20 WB @6 kg)",Intensity_Target:"Run : Z3 haute / début Z4 ; WB : cadence régulière (20-24 reps/min)",Recovery_Between_Sets:"90'' entre blocs",CoolDown:"8' Z1-2 + étirements chevilles/hanche",Strength_Details:"",Notes:"Objectif : garder la même allure sur chaque 800 m."},
+  {Week:1,Day:"Jeudi",Time:"Midi",SessionType:"Mobilité + Core",Focus:"Récup active",WarmUp:"10' vélo Z1 + routine hanches/chevilles 10'",MainSet:"Core anti-extension : rollout 3x6 ; side plank 3x30''/side ; bird-dog 2x10/side",Intensity_Target:"RPE 5-6",Recovery_Between_Sets:"60-90''",CoolDown:"Respiration nasale 3'",Strength_Details:"",Notes:"Viser sensations fraîches pour le soir."},
+  {Week:1,Day:"Jeudi",Time:"Soir",SessionType:"Sled Push Volume/Technique",Focus:"Cadence + économie",WarmUp:"2x12,5 m léger + 2x12,5 m modéré",MainSet:"8x(20-25 m) charge moyenne, cadence constante",Intensity_Target:"RPE 7",Recovery_Between_Sets:"90''",CoolDown:"2x12,5 m décharge + respiration 3'",Strength_Details:"Fentes marchées 3x20 m ; Farmer carry 2x100 m",Notes:"Pas mid-foot, talons proches du sol, cou raide neutre."},
+  {Week:1,Day:"Vendredi",Time:"Midi",SessionType:"Bench Volume + Accessoires",Focus:"Hypertrophie/volume",WarmUp:"Élastiques + 5' rameur easy",MainSet:"Bench 4x6-8 @70–75% ; Pompes lestées 3x10 ; Tirage poulie 4x10",Intensity_Target:"RPE 7-8",Recovery_Between_Sets:"90''",CoolDown:"Étirements légers 5'",Strength_Details:"",Notes:"Arrêter 1-2 reps avant l'échec."},
+  {Week:1,Day:"Vendredi",Time:"Soir",SessionType:"Footing Z2",Focus:"Endurance fondamentale",WarmUp:"10' Z1",MainSet:"40-50' Z2 en aisance (cadence 170-180)",Intensity_Target:"Garmin Z2",Recovery_Between_Sets:"-",CoolDown:"5' Z1 + mobilité 5'",Strength_Details:"",Notes:"Respiration nasale majoritaire si possible."},
+  {Week:1,Day:"Samedi",Time:"Weekend",SessionType:"Mini-Hyrox (80–90%)",Focus:"Spécifique course",WarmUp:"10' Z2 + quelques reps techniques stations",MainSet:"Hyrox réduit : 6x (800 m run + station : SkiErg 500 m / Sled push 2x12,5 m modéré / Sled pull 20 m / Burpees broad jump 10 / Row 500 m / Farmer 2x50 m / Lunges 40 m / WB 60)",Intensity_Target:"Global RPE 8-9 (ne pas aller à bloc semaine 1)",Recovery_Between_Sets:"Station → 60-90'' → run",CoolDown:"10-15' cool-down",Strength_Details:"",Notes:"Noter temps total et splits de run."},
+  {Week:1,Day:"Dimanche",Time:"Weekend",SessionType:"Endurance Fondamentale + Mobilité",Focus:"Base aérobie",WarmUp:"10' Z1",MainSet:"60' Z2 continu (ou 2x30' si chaud)",Intensity_Target:"Garmin Z2",Recovery_Between_Sets:"-",CoolDown:"10' mobilité complète",Strength_Details:"",Notes:"Écoute sensations ; viser dérive cardiaque faible."},
+
+  // ===== WEEK 2 =====
+  {Week:2,Day:"Lundi",Time:"Midi",SessionType:"Strength (Bas + Core)",Focus:"Progression force technique",WarmUp:"5' cardio + mobilité 5'",MainSet:"Front squat 6x3 @75-78% ; Split squat bulgare 3x8 ; Good morning 3x8 ; Pallof 3x12/side",Intensity_Target:"RPE 7-8",Recovery_Between_Sets:"90-120''",CoolDown:"Respiration 3-5'",Strength_Details:"",Notes:"Ajouter ceinture si besoin, bricing solide."},
+  {Week:2,Day:"Lundi",Time:"Soir",SessionType:"Run Technique + Strides",Focus:"Technique course",WarmUp:"12' Z2 + gammes 8'",MainSet:"10x20'' en aisance / 60'' trot",Intensity_Target:"RPE 7 max",Recovery_Between_Sets:"60''",CoolDown:"8' Z1-2",Strength_Details:"",Notes:"Toujours relâché en haut du corps."},
+  {Week:2,Day:"Mardi",Time:"Midi",SessionType:"Erg Z2",Focus:"Aérobie continue",WarmUp:"5' progressif",MainSet:"35' Z2 (split : 20' SkiErg + 15' Rameur)",Intensity_Target:"Garmin Z2",Recovery_Between_Sets:"-",CoolDown:"5' Z1",Strength_Details:"",Notes:"Cadence stable, technique propre."},
+  {Week:2,Day:"Mardi",Time:"Soir",SessionType:"Run Seuil (format Seiler)",Focus:"Capacité seuil soutenue",WarmUp:"12' Z2 + éducatifs 6'",MainSet:"4x8' @ seuil (dur mais contrôlé) / 3' trot",Intensity_Target:"Z3 haute (80–87% FCmax), RPE 8-8.5",Recovery_Between_Sets:"3' trot",CoolDown:"8' Z1-2",Strength_Details:"",Notes:"Allure quasi identique sur les 4 blocs."},
+  {Week:2,Day:"Mercredi",Time:"Midi",SessionType:"Bench Lourd + Tirages",Focus:"Force haut du corps",WarmUp:"Rotations + élastiques",MainSet:"Bench 5x3 @82–86% ; Row barre 4x6-8 ; Face pulls 3x15 ; Dips 3x6-8",Intensity_Target:"RPE 8-9 bench",Recovery_Between_Sets:"120''",CoolDown:"Étirements 5'",Strength_Details:"",Notes:"Si forme top, tenter une 6e série à même charge."},
+  {Week:2,Day:"Mercredi",Time:"Soir",SessionType:"Compromise Run+WB (progression)",Focus:"Transitions plus dures",WarmUp:"10' Z2 + 10 WB",MainSet:"6x (600 m @ allure 10 km + 20 WB @6 kg)",Intensity_Target:"Run Z3-Z4, WB cadence stable",Recovery_Between_Sets:"90''",CoolDown:"8' Z1-2",Strength_Details:"",Notes:"Chercher régularité d'allures."},
+  {Week:2,Day:"Jeudi",Time:"Midi",SessionType:"Mobilité + Core",Focus:"Récup active",WarmUp:"10' vélo Z1",MainSet:"Rollout 3x6-8 ; Side plank 3x35''/side ; Copenhagen 2x20''/side",Intensity_Target:"RPE 6",Recovery_Between_Sets:"60-90''",CoolDown:"Respiration 3'",Strength_Details:"",Notes:"Hanches/chevilles en priorité."},
+  {Week:2,Day:"Jeudi",Time:"Soir",SessionType:"Sled Push Volume/Technique",Focus:"Cadence/économie + lunges",WarmUp:"2x12,5 m léger",MainSet:"10x(20 m) charge moyenne ; Lunges 4x20 m",Intensity_Target:"RPE 7",Recovery_Between_Sets:"90''",CoolDown:"2x12,5 m léger + resp 3'",Strength_Details:"Farmer 3x80-100 m",Notes:"Noter temps par 20 m, viser constance."},
+  {Week:2,Day:"Vendredi",Time:"Midi",SessionType:"Bench Volume + Accessoires",Focus:"Hypertrophie",WarmUp:"Élastiques + 5' rameur",MainSet:"Bench 5x5 @72–77% ; Pompes lestées 4x8 ; Tirage vertical 4x10",Intensity_Target:"RPE 7-8",Recovery_Between_Sets:"90''",CoolDown:"Étirements 5'",Strength_Details:"",Notes:"Qualité du mouvement > charge."},
+  {Week:2,Day:"Vendredi",Time:"Soir",SessionType:"Footing Z2",Focus:"Base aérobie",WarmUp:"10' Z1",MainSet:"45-55' Z2 (si fatigue, 40')",Intensity_Target:"Garmin Z2",Recovery_Between_Sets:"-",CoolDown:"5-10' Z1",Strength_Details:"",Notes:"Gardez jambe fraîche pour samedi."},
+  {Week:2,Day:"Samedi",Time:"Weekend",SessionType:"Mini-Hyrox (progression)",Focus:"Spécifique course",WarmUp:"10' Z2 + mobilité",MainSet:"8x (1 km run + station Hyrox) mais à 80-90% (WB 80 au max cette semaine)",Intensity_Target:"Global RPE 8-9",Recovery_Between_Sets:"Station → 60-90'' → run",CoolDown:"10-15' cool-down",Strength_Details:"",Notes:"Comparer au Semaine 1 : vise run plus stable."},
+  {Week:2,Day:"Dimanche",Time:"Weekend",SessionType:"EF 60' + Décrassage",Focus:"Base aérobie",WarmUp:"10' Z1",MainSet:"60' Z2",Intensity_Target:"Garmin Z2",Recovery_Between_Sets:"-",CoolDown:"10' mobilité",Strength_Details:"",Notes:"Option : 6-8 lignes droites 15'' en fin."},
+
+  // ===== WEEK 3 =====
+  {Week:3,Day:"Lundi",Time:"Midi",SessionType:"Strength (Bas + Core)",Focus:"Force bas prog.",WarmUp:"5' cardio + mobilité",MainSet:"Front squat 5x3 @78–82% ; Presse 3x6 @ lourd ; Pallof 3x12/side ; Hip thrust 3x8",Intensity_Target:"RPE 8",Recovery_Between_Sets:"120''",CoolDown:"Respiration 3-5'",Strength_Details:"",Notes:"Ne pas grinder ; reps propres."},
+  {Week:3,Day:"Lundi",Time:"Soir",SessionType:"Run Technique + Strides",Focus:"Technique course",WarmUp:"12' Z2 + gammes",MainSet:"12x20'' / 60'' trot",Intensity_Target:"RPE 7",Recovery_Between_Sets:"60''",CoolDown:"8' Z1-2",Strength_Details:"",Notes:"Cadence régulière."},
+  {Week:3,Day:"Mardi",Time:"Midi",SessionType:"Erg Z2",Focus:"Aérobie",WarmUp:"5' progressif",MainSet:"35' Z2 (rameur ou SkiErg)",Intensity_Target:"Garmin Z2",Recovery_Between_Sets:"-",CoolDown:"5'",Strength_Details:"",Notes:"Souffle facile."},
+  {Week:3,Day:"Mardi",Time:"Soir",SessionType:"Run VO2 (10x400 m)",Focus:"Pointe vitesse aérobie",WarmUp:"12' Z2 + éducatifs",MainSet:"10x400 m @ allure ~5 km (récup 1')",Intensity_Target:"Z4 (brefs pics Z5), RPE 9",Recovery_Between_Sets:"1' marche/trot",CoolDown:"10' Z1-2",Strength_Details:"",Notes:"Régularité des 400 m ; pas de sprint final."},
+  {Week:3,Day:"Mercredi",Time:"Midi",SessionType:"Bench Lourd + Tirages",Focus:"Force haut du corps",WarmUp:"Élastiques",MainSet:"Bench 6x3 @83–87% ; Row 4x6 ; Face pulls 3x15 ; Dips 3x6-8",Intensity_Target:"RPE 8-9",Recovery_Between_Sets:"120''",CoolDown:"Étirements",Strength_Details:"",Notes:"Si facile, +2.5 kg semaine pro."},
+  {Week:3,Day:"Mercredi",Time:"Soir",SessionType:"Compromise Run+WB (capacités)",Focus:"WB volume",WarmUp:"10' Z2 + 10 WB",MainSet:"2x50 WB @6 kg (récup 2') puis 4x (600 m + 20 WB)",Intensity_Target:"Run Z3, WB cadence 20-24/min",Recovery_Between_Sets:"90''-2'",CoolDown:"8' Z1-2",Strength_Details:"",Notes:"Objectif : vers 100 WB UB semaine 4 (test)."},
+  {Week:3,Day:"Jeudi",Time:"Midi",SessionType:"Mobilité + Core",Focus:"Récup",WarmUp:"10' vélo Z1",MainSet:"Rollout 3x8 ; Side plank 3x40''/side ; Copenhagen 3x20''/side",Intensity_Target:"RPE 6",Recovery_Between_Sets:"60-90''",CoolDown:"Resp nasale",Strength_Details:"",Notes:"Préserver fraîcheur."},
+  {Week:3,Day:"Jeudi",Time:"Soir",SessionType:"Sled Push Lourd + Brick",Focus:"Spécifique + course compromise",WarmUp:"2x12,5 m léger + 2x12,5 m modéré",MainSet:"8x(12,5 m lourd) puis 4-6x (12,5 m lourd + 400 m run @ allure 10 km)",Intensity_Target:"Sled RPE 8-9 ; Run Z3",Recovery_Between_Sets:"2-3' entre allers ; 2' entre bricks",CoolDown:"2x12,5 m léger",Strength_Details:"Lunges 3x20 m",Notes:"Noter allure 400 m post-sled."},
+  {Week:3,Day:"Vendredi",Time:"Midi",SessionType:"Bench Volume + Accessoires",Focus:"Hypertrophie",WarmUp:"Élastiques",MainSet:"Bench 5x5 @74–78% ; Pompes lestées 4x10 ; Tirage vertical 4x10",Intensity_Target:"RPE 7-8",Recovery_Between_Sets:"90''",CoolDown:"Étirements",Strength_Details:"",Notes:"Arrêter 1 rep avant échec."},
+  {Week:3,Day:"Vendredi",Time:"Soir",SessionType:"Footing Z2",Focus:"Aérobie facile",WarmUp:"10' Z1",MainSet:"45-55' Z2",Intensity_Target:"Garmin Z2",Recovery_Between_Sets:"-",CoolDown:"5-10' Z1",Strength_Details:"",Notes:"Si fatigue -> 35-40'."},
+  {Week:3,Day:"Samedi",Time:"Weekend",SessionType:"Mini-Hyrox (85–95%)",Focus:"Dress rehearsal partiel",WarmUp:"10' Z2 + mobilité",MainSet:"Version quasi-complète à 85-95% ; viser WB 80-100 (selon fraîcheur)",Intensity_Target:"Global RPE 9",Recovery_Between_Sets:"Station → 60-90'' → run",CoolDown:"10-15' cool-down",Strength_Details:"",Notes:"Ne pas totalement all-out ; garder marge."},
+  {Week:3,Day:"Dimanche",Time:"Weekend",SessionType:"EF 60-70' + Décrassage",Focus:"Base aérobie",WarmUp:"10' Z1",MainSet:"60-70' Z2",Intensity_Target:"Garmin Z2",Recovery_Between_Sets:"-",CoolDown:"10' mobilité",Strength_Details:"",Notes:"Semaine 4 = deload."},
+
+  // ===== WEEK 4 (DELOAD) =====
+  {Week:4,Day:"Lundi",Time:"Midi",SessionType:"Strength (Bas + Core) - Deload",Focus:"Entretien technique",WarmUp:"5' cardio + mobilité",MainSet:"Front squat 4x3 @65-70% ; Split squat 2x8 ; RDL 2x6 ; Pallof 2x10/side",Intensity_Target:"RPE 6-7",Recovery_Between_Sets:"90''",CoolDown:"Resp 3'",Strength_Details:"",Notes:"Volume réduit ~40%."},
+  {Week:4,Day:"Lundi",Time:"Soir",SessionType:"Run Technique Light",Focus:"Economie gestuelle",WarmUp:"10' Z2 + gammes courtes",MainSet:"6x20'' / 60'' trot",Intensity_Target:"RPE 6-7",Recovery_Between_Sets:"60''",CoolDown:"8' Z1",Strength_Details:"",Notes:"Focus relâchement."},
+  {Week:4,Day:"Mardi",Time:"Midi",SessionType:"Erg Z2 - Court",Focus:"Récup aérobie",WarmUp:"5' progressif",MainSet:"25' Z2",Intensity_Target:"Garmin Z2",Recovery_Between_Sets:"-",CoolDown:"5' Z1",Strength_Details:"",Notes:"Montrer fraîcheur."},
+  {Week:4,Day:"Mardi",Time:"Soir",SessionType:"Run Seuil (allégé)",Focus:"Stimulation sans fatigue",WarmUp:"10' Z2",MainSet:"3x6' @ seuil / 3' trot",Intensity_Target:"Z3 haute, RPE 8 max",Recovery_Between_Sets:"3'",CoolDown:"8' Z1-2",Strength_Details:"",Notes:"Arrêter net si sensations médiocres."},
+  {Week:4,Day:"Mercredi",Time:"Midi",SessionType:"Bench (Light) + Tirages",Focus:"Entretien",WarmUp:"Élastiques",MainSet:"Bench 4x3 @70-75% ; Row 3x8 ; Face pulls 2x15",Intensity_Target:"RPE 7",Recovery_Between_Sets:"90''",CoolDown:"Étirements",Strength_Details:"",Notes:"Économie nerveuse."},
+  {Week:4,Day:"Mercredi",Time:"Soir",SessionType:"Compromise Light",Focus:"Transitions légères",WarmUp:"8' Z2 + 10 WB",MainSet:"4x (600 m Z3 basse + 15 WB)",Intensity_Target:"RPE 7-8 global",Recovery_Between_Sets:"90''",CoolDown:"8' Z1-2",Strength_Details:"",Notes:"Qualité mouvement > chrono."},
+  {Week:4,Day:"Jeudi",Time:"Midi",SessionType:"Mobilité + Core (Light)",Focus:"Récup",WarmUp:"10' vélo Z1",MainSet:"Rollout 2x6 ; Side plank 2x30''",Intensity_Target:"RPE 5-6",Recovery_Between_Sets:"60-90''",CoolDown:"Resp nasale",Strength_Details:"",Notes:"Dodo prioritaire."},
+  {Week:4,Day:"Jeudi",Time:"Soir",SessionType:"Sled Technique - Court",Focus:"Toucher le geste",WarmUp:"2x12,5 m léger",MainSet:"6x(12,5-20 m) charge légère-moyenne",Intensity_Target:"RPE 6-7",Recovery_Between_Sets:"90''",CoolDown:"2x12,5 m léger",Strength_Details:"",Notes:"Pas courts, mains basses."},
+  {Week:4,Day:"Vendredi",Time:"Midi",SessionType:"Bench Volume (Light)",Focus:"Entretien",WarmUp:"Élastiques",MainSet:"Bench 3x5 @70% ; Pompes 2x10 ; Tirage 2x10",Intensity_Target:"RPE 6-7",Recovery_Between_Sets:"90''",CoolDown:"Étirements",Strength_Details:"",Notes:"Finir frais."},
+  {Week:4,Day:"Vendredi",Time:"Soir",SessionType:"Footing Z2 Court",Focus:"EF",WarmUp:"8' Z1",MainSet:"35-40' Z2",Intensity_Target:"Garmin Z2",Recovery_Between_Sets:"-",CoolDown:"5-8' Z1",Strength_Details:"",Notes:"Jambes fraîches pour samedi."},
+  {Week:4,Day:"Samedi",Time:"Weekend",SessionType:"Mini-Hyrox (70–80%) - Deload",Focus:"Spécifique allégé",WarmUp:"10' Z2 + mobilité",MainSet:"Version raccourcie (ex : 6x 800 m + stations) à 70-80%",Intensity_Target:"Global RPE 7-8",Recovery_Between_Sets:"90''",CoolDown:"10' cool-down",Strength_Details:"",Notes:"Ne pas chercher le chrono."},
+  {Week:4,Day:"Dimanche",Time:"Weekend",SessionType:"EF 50-60' + Mobilité",Focus:"Base aérobie",WarmUp:"8' Z1",MainSet:"50-60' Z2",Intensity_Target:"Garmin Z2",Recovery_Between_Sets:"-",CoolDown:"10' mobilité",Strength_Details:"",Notes:"Prêt à repartir en Semaine 5 (nouveau cycle)."}
+];
+
+// (je ne le recolle pas pour gagner de la place : garde exactement le tien)
+
+const PROGRAM_START = new Date(2025, 10, 10); // lundi 10/11/2025
+
+/* ----------------- CATEGORIES ----------------- */
+const catRules = [
+  {key:'Sled',      match:t=>/Sled/i.test(t),                 icon:'🛷'},
+  {key:'Compromise',match:t=>/Compromise/i.test(t),           icon:'🧱'},
+  {key:'Strength',  match:t=>/(Strength|Bench)/i.test(t),     icon:'🏋️'},
+  {key:'Erg',       match:t=>/Erg/i.test(t),                  icon:'🚣'},
+  {key:'MiniHyrox', match:t=>/Mini-?Hyrox/i.test(t),          icon:'🎯'},
+  {key:'Mobility',  match:t=>/Mobilité/i.test(t),             icon:'🧘'},
+  {key:'Run',       match:t=>/(Run|Footing|Endurance Fondamentale|EF)/i.test(t), icon:'🏃'},
+];
+
+function detectCat(sessionType){
+  const rule = catRules.find(r=>r.match(sessionType));
+  return rule ? {key:rule.key, icon:rule.icon} : {key:'Other', icon:'📌'};
+}
+
+const filtersState = {
+  Run:true,
+  Strength:true,
+  Sled:true,
+  Compromise:true,
+  Mobility:true,
+  Erg:true,
+  MiniHyrox:true,
+};
+
+/* ------------------ DATE UTILS ----------------- */
+function toYMD(d){
+  const year  = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day   = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function addDays(d, n){
+  const x=new Date(d);
+  x.setDate(x.getDate()+n);
+  return x;
+}
+
+/* ------------------ RENDER --------------------- */
+const content  = document.getElementById('content');
+const weekSelect = document.getElementById('weekSelect');
+const legendEl = document.getElementById('legend');
+const modal    = document.getElementById('modal');
+
+function init(){
+  weekSelect.value = '1';
+  renderLegend();
+  render();
+}
+
+function renderLegend(){
+  legendEl.innerHTML = '';
+  const order = ['Run','Strength','Sled','Compromise','Erg','Mobility','MiniHyrox'];
+  order.forEach(k=>{
+    const chip = document.createElement('button');
+    chip.className = 'chip ' + k;
+    chip.dataset.active = String(!!filtersState[k]);
+    chip.innerHTML = `<span class="dot ${k}"></span> ${getIcon(k)} ${k}`;
+    chip.onclick = ()=>{
+      filtersState[k]=!filtersState[k];
+      chip.dataset.active = String(!!filtersState[k]);
+      render();
+    };
+    legendEl.appendChild(chip);
+  });
+}
+
+function getIcon(k){
+  const m={
+    Run:'🏃',Strength:'🏋️',Sled:'🛷',
+    Compromise:'🧱',Mobility:'🧘',Erg:'🚣',
+    MiniHyrox:'🎯',
+  };
+  return m[k]||'📌';
+}
+
+function render(){
+  const selected = weekSelect.value || '1';
+  const week = parseInt(selected,10);
+
+  content.innerHTML = '';
+  const today = new Date();
+
+  const weekStart = addDays(PROGRAM_START,(week-1)*7);
+  const h = document.createElement('h2');
+  h.className='week-title';
+  h.innerHTML = `Semaine <span>${week}</span> · ${weekStart.toLocaleDateString('fr-FR')}`;
+  content.appendChild(h);
+
+  const grid = document.createElement('div');
+  grid.className='grid';
+  content.appendChild(grid);
+
+  const days = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+  days.forEach((dayName, idx)=>{
+    const dayCard = document.createElement('section');
+    dayCard.className='day';
+
+    const date = addDays(weekStart, idx);
+    const isToday = toYMD(date)===toYMD(today);
+    if(isToday) dayCard.classList.add('today');
+
+    dayCard.innerHTML = `
+      <div class="day-header">
+        <div class="name">${dayName}</div>
+        <div class="date-wrap">
+          <div class="date">${date.toLocaleDateString('fr-FR',{day:'2-digit', month:'2-digit'})}</div>
+          ${isToday?'<div class="today-pill">Aujourd\'hui</div>':''}
+        </div>
+      </div>
+      <div class="sessions"></div>`;
+
+    const wrap = dayCard.querySelector('.sessions');
+
+    const sessions = plan.filter(p=>p.Week===week && p.Day===dayName);
+    const order = {"Midi":1,"Soir":2,"Weekend":3};
+    sessions.sort((a,b)=>(order[a.Time]||9)-(order[b.Time]||9));
+
+    sessions.forEach(s=>{
+      const {key, icon} = detectCat(s.SessionType);
+      if(!filtersState[key]) return;
+
+      const id = `w${week}-${dayName}-${s.Time}-${s.SessionType}`;
+      const done = !!localStorage.getItem('done:'+id);
+
+      const card = document.createElement('article');
+      card.className='card';
+      if(done) card.classList.add('done');
+
+      card.innerHTML = `
+        <div class="title">
+          <span class="dot ${key}"></span>
+          <span class="time">${s.Time}</span>
+          <span class="type">${icon} ${escapeHtml(s.SessionType)}</span>
+          ${done?'<span class="session-status">Fait</span>':''}
+        </div>
+        <div class="focus">${escapeHtml(s.Focus)}</div>
+        <div class="tags">
+          ${tagHtml(s.Intensity_Target)}
+        </div>
+      `;
+      card.onclick = ()=>openModal(week, dayName, s);
+      wrap.appendChild(card);
+    });
+
+    grid.appendChild(dayCard);
+  });
+}
+
+function tagHtml(text){
+  if(!text) return '';
+  return `<span class="tag">${escapeHtml(text)}</span>`;
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g,
+    s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[s])
+  );
+}
+
+/* ------------------ MODAL --------------------- */
+function openModal(week, day, s){
+  const {key, icon} = detectCat(s.SessionType);
+  const id = `w${week}-${day}-${s.Time}-${s.SessionType}`;
+  const done = !!localStorage.getItem('done:'+id);
+
+  modal.innerHTML = `
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>${icon} ${escapeHtml(s.SessionType)} · ${escapeHtml(day)} (${escapeHtml(s.Time)})</h3>
+        <button class="btn secondary" onclick="closeModal()">Fermer</button>
+      </div>
+      <div class="modal-body">
+        <div class="kv"><h4>Objectif</h4><pre>${escapeHtml(s.Focus)}</pre></div>
+        <div class="kv"><h4>Échauffement</h4><pre>${escapeHtml(s.WarmUp)}</pre></div>
+        <div class="kv"><h4>Corps de séance</h4><pre>${escapeHtml(s.MainSet)}</pre></div>
+        <div class="kv"><h4>Intensité</h4><pre>${escapeHtml(s.Intensity_Target)}</pre></div>
+        <div class="kv"><h4>Récup entre séries</h4><pre>${escapeHtml(s.Recovery_Between_Sets)}</pre></div>
+        <div class="kv"><h4>Retour au calme</h4><pre>${escapeHtml(s.CoolDown)}</pre></div>
+        ${s.Strength_Details?`<div class="kv"><h4>Renfo complémentaire</h4><pre>${escapeHtml(s.Strength_Details)}</pre></div>`:''}
+        ${s.Notes?`<div class="kv"><h4>Notes</h4><pre>${escapeHtml(s.Notes)}</pre></div>`:''}
+        <div class="small">Catégorie: <span class="dot ${key}"></span> ${key}</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn${done ? ' is-done' : ''}" id="doneBtn" onclick="toggleDone('${id}')">
+          ${done?'✅ Séance faite':'Marquer fait'}
+        </button>
+      </div>
+    </div>`;
+  modal.setAttribute('open','');
+}
+
+function closeModal(){
+  modal.removeAttribute('open');
+}
+
+function toggleDone(id){
+  const key='done:'+id;
+  if(localStorage.getItem(key)){
+    localStorage.removeItem(key);
+  }else{
+    localStorage.setItem(key,'1');
+  }
+  const btn=document.getElementById('doneBtn');
+  if(btn){
+    const isDone = !!localStorage.getItem(key);
+    btn.textContent = isDone ? '✅ Séance faite' : 'Marquer fait';
+    btn.classList.toggle('is-done', isDone);
+  }
+  render();
+}
+
+/* ----------- TODAY BUTTON / EVENTS ----------- */
+const todayBtn   = document.getElementById('todayBtn');
+const filtersBtn = document.getElementById('filtersBtn');
+
+todayBtn.addEventListener('click', ()=>{
+  const today = new Date();
+  const diffMs = today - PROGRAM_START;
+  const diffDays = Math.floor(diffMs / (1000*60*60*24));
+  let week = Math.floor(diffDays / 7) + 1;
+
+  if (week < 1) week = 1;
+  if (week > 4) week = 4;
+
+  weekSelect.value = String(week);
+  render();
+
+  const cards = document.querySelectorAll('.day.today');
+  if(cards[0]) cards[0].scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+weekSelect.addEventListener('change', render);
+
+filtersBtn.addEventListener('click', ()=>{
+  legendEl.classList.toggle('is-open');
+});
+
+/* ------------------ START --------------------- */
+init();
+</script>
+</body>
+</html>
